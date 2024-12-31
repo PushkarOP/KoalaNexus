@@ -114,6 +114,7 @@ const useStore = create<StoreState>()(
         return {
           ...createPartializedState({} as StoreState),
           ...state,
+          autoTitle: false,
         };
       },
     }
