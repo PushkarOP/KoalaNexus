@@ -43,7 +43,7 @@ export const createConfigSlice: StoreSlice<ConfigSlice> = (set) => ({
   theme: 'dark',
   hideMenuOptions: false,
   hideSideMenu: false,
-  autoTitle: true,
+  autoTitle: false,
   closeToTray: false,
   enterToSubmit: true,
   confirmEditSubmission: true,
