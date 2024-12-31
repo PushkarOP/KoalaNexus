@@ -22,7 +22,9 @@
     <script>
       // Function to get a cookie by name
       function getCookie(name) {
-        const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+        const cookies = document.cookie
+          .split(';')
+          .map((cookie) => cookie.trim());
         console.log('Cookies Array:', cookies); // Debugging line
         for (let cookie of cookies) {
           if (cookie.startsWith(name + '=')) {
@@ -36,7 +38,7 @@
         console.log('Turnstile token:', token);
       }
 
-      window.onload = function() {
+      window.onload = function () {
         console.log('All Cookies:', document.cookie);
         const sessionCookie = getCookie('session_id');
         console.log('Session Cookie:', sessionCookie);
