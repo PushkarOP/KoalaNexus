@@ -25,14 +25,17 @@ const executeRecaptcha = async (): Promise<string> => {
     if (typeof window.grecaptcha === 'undefined') {
       // Add reCAPTCHA script if it's not already loaded
       const script = document.createElement('script');
-      script.src = 'https://www.google.com/recaptcha/api.js?render=6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup';
+      script.src =
+        'https://www.google.com/recaptcha/api.js?render=6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup';
       script.async = true;
       document.head.appendChild(script);
 
       script.onload = () => {
         window.grecaptcha.ready(() => {
           window.grecaptcha
-            .execute('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup', { action: 'submit' })
+            .execute('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup', {
+              action: 'submit',
+            })
             .then((token: string) => resolve(token));
         });
       };
@@ -40,7 +43,9 @@ const executeRecaptcha = async (): Promise<string> => {
       // If reCAPTCHA is already loaded, execute directly
       window.grecaptcha.ready(() => {
         window.grecaptcha
-          .execute('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup', { action: 'submit' })
+          .execute('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup', {
+            action: 'submit',
+          })
           .then((token: string) => resolve(token));
       });
     }
