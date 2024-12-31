@@ -25,7 +25,7 @@
   "autoTitle": "Auto generate title",
   "closeToTray": "Minimize to tray on close",
   "advancedMode": "Advanced mode",
-  "inlineLatex": "Inline latex",
+  "inlineLatex": "Inline latex ( Maths )",
   "prompt": "Prompt",
   "promptLibrary": "Prompt Library",
   "name": "Name",

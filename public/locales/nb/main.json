@@ -24,7 +24,7 @@
   "image": "Bilde",
   "autoTitle": "Auto generer tittel",
   "advancedMode": "Avansert modus",
-  "inlineLatex": "Inline latex",
+  "inlineLatex": "Inline latex ( Maths )",
   "prompt": "Oppgave",
   "promptLibrary": "Oppgavebibliotek",
   "name": "Navn",
