@@ -19,6 +19,34 @@
     <meta name="twitter:title" content="KoalaClient" />
     <meta name="twitter:card" content="summary_large_image" />
     <title>KoalaClient</title>
+    <script>
+      // Function to get a cookie by name
+      function getCookie(name) {
+        const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+        console.log('Cookies Array:', cookies); // Debugging line
+        for (let cookie of cookies) {
+          if (cookie.startsWith(name + '=')) {
+            return cookie.substring((name + '=').length);
+          }
+        }
+        return null;
+      }
+
+      function onTurnstileSuccess(token) {
+        console.log('Turnstile token:', token);
+      }
+
+      window.onload = function() {
+        console.log('All Cookies:', document.cookie);
+        const sessionCookie = getCookie('session_id');
+        console.log('Session Cookie:', sessionCookie);
+        if (!sessionCookie) {
+          // If not, redirect to the login page
+          window.location.href = 'https://www.nexusmind.tech?error=login';
+        }
+      };
+    </script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup"></script>
   </head>
   <body>
     <div id="root"></div>
