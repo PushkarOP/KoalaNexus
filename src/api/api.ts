@@ -2,6 +2,20 @@ import { ShareGPTSubmitBodyInterface } from '@type/api';
 import { ConfigInterface, MessageInterface, ModelDefinition } from '@type/chat';
 import { isAzureEndpoint, uuidv4 } from '@utils/api';
 
+declare const grecaptcha: any;
+//test
+const executeRecaptcha = async (action: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    grecaptcha.ready(() => {
+      grecaptcha.execute('6LeIzz8qAAAAAFx2MY7vm0pLQpzWM_HFrK1sW8y5', { action }).then((token: string) => {
+        resolve(token);
+      }).catch((error: any) => {
+        reject(error);
+      });
+    });
+  });
+};
+
 // Existing getSessionCookie function
 const getSessionCookie = (): string | undefined => {
   const name = 'session_id=';
@@ -19,39 +33,6 @@ const getSessionCookie = (): string | undefined => {
   return undefined;
 };
 
-// Add this new function to handle reCAPTCHA manually
-const executeRecaptcha = async (): Promise<string> => {
-  return new Promise((resolve) => {
-    if (typeof window.grecaptcha === 'undefined') {
-      // Add reCAPTCHA script if it's not already loaded
-      const script = document.createElement('script');
-      script.src =
-        'https://www.google.com/recaptcha/api.js?render=6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup';
-      script.async = true;
-      document.head.appendChild(script);
-
-      script.onload = () => {
-        window.grecaptcha.ready(() => {
-          window.grecaptcha
-            .execute('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup', {
-              action: 'submit',
-            })
-            .then((token: string) => resolve(token));
-        });
-      };
-    } else {
-      // If reCAPTCHA is already loaded, execute directly
-      window.grecaptcha.ready(() => {
-        window.grecaptcha
-          .execute('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup', {
-            action: 'submit',
-          })
-          .then((token: string) => resolve(token));
-      });
-    }
-  });
-};
-
 export const getChatCompletion = async (
   endpoint: string,
   messages: MessageInterface[],
@@ -66,13 +47,13 @@ export const getChatCompletion = async (
   };
   const sessionCookie = getSessionCookie();
   headers.Authorization = `Bearer NexusAI`;
-
+  
   config.user = uuidv4();
 
   delete (config as any).model_selection;
 
-  // Replace recaptcha implementation
-  const recaptchaToken = await executeRecaptcha();
+  // Load the reCAPTCHA script and get the token
+  const recaptchaToken = await executeRecaptcha('getChatCompletion');
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -109,8 +90,8 @@ export const getChatCompletionStream = async (
 
   delete (config as any).model_selection;
 
-  // Replace recaptcha implementation
-  const recaptchaToken = await executeRecaptcha();
+  // Load the reCAPTCHA script and get the token
+  const recaptchaToken = await executeRecaptcha('getChatCompletion');
 
   const response = await fetch(endpoint, {
     method: 'POST',
