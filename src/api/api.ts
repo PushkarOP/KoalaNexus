@@ -7,11 +7,14 @@ declare const grecaptcha: any;
 const executeRecaptcha = async (action: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     grecaptcha.ready(() => {
-      grecaptcha.execute('6LeIzz8qAAAAAFx2MY7vm0pLQpzWM_HFrK1sW8y5', { action }).then((token: string) => {
-        resolve(token);
-      }).catch((error: any) => {
-        reject(error);
-      });
+      grecaptcha
+        .execute('6LeIzz8qAAAAAFx2MY7vm0pLQpzWM_HFrK1sW8y5', { action })
+        .then((token: string) => {
+          resolve(token);
+        })
+        .catch((error: any) => {
+          reject(error);
+        });
     });
   });
 };
@@ -47,7 +50,7 @@ export const getChatCompletion = async (
   };
   const sessionCookie = getSessionCookie();
   headers.Authorization = `Bearer NexusAI`;
-  
+
   config.user = uuidv4();
 
   delete (config as any).model_selection;
