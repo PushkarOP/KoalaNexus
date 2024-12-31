@@ -1,6 +1,24 @@
 import { ShareGPTSubmitBodyInterface } from '@type/api';
 import { ConfigInterface, MessageInterface, ModelDefinition } from '@type/chat';
 import { isAzureEndpoint, uuidv4 } from '@utils/api';
+import { load } from 'recaptcha-v3';
+
+// Existing getSessionCookie function
+const getSessionCookie = (): string | undefined => {
+  const name = 'session_id=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) === 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return undefined;
+};
 
 export const getChatCompletion = async (
   endpoint: string,
@@ -14,29 +32,16 @@ export const getChatCompletion = async (
     'Content-Type': 'application/json',
     ...customHeaders,
   };
-  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+  const sessionCookie = getSessionCookie();
+  headers.Authorization = `Bearer NexusAI`;
 
-  if (isAzureEndpoint(endpoint) && apiKey) {
-    headers['api-key'] = apiKey;
-
-    const modelName = modelDef.model;
-
-    const apiVersion = '2023-03-15-preview';
-
-    const path = `openai/deployments/${modelName}/chat/completions?api-version=${apiVersion}`;
-
-    if (!endpoint.endsWith(path)) {
-      if (!endpoint.endsWith('/')) {
-        endpoint += '/';
-      }
-      endpoint += path;
-    }
-  }
-
-  // todo: option in config
   config.user = uuidv4();
 
   delete (config as any).model_selection;
+
+  // Load the reCAPTCHA script and get the token
+  const recaptcha = await load('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup');
+  const recaptchaToken = await recaptcha.execute('submit');
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -44,6 +49,8 @@ export const getChatCompletion = async (
     body: JSON.stringify({
       messages,
       ...config,
+      session: sessionCookie,
+      recaptcha_token: recaptchaToken,
     }),
   });
   if (!response.ok) throw new Error(await response.text());
@@ -64,29 +71,16 @@ export const getChatCompletionStream = async (
     'Content-Type': 'application/json',
     ...customHeaders,
   };
-
-  if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
-  if (isAzureEndpoint(endpoint) && apiKey) {
-    headers['api-key'] = apiKey;
-
-    const modelName = modelDef.model;
-
-    const apiVersion = '2023-03-15-preview';
-
-    const path = `openai/deployments/${modelName}/chat/completions?api-version=${apiVersion}`;
-
-    if (!endpoint.endsWith(path)) {
-      if (!endpoint.endsWith('/')) {
-        endpoint += '/';
-      }
-      endpoint += path;
-    }
-  }
-
+  const sessionCookie = getSessionCookie();
+  headers.Authorization = `Bearer NexusAI`;
   // todo: option in config
   config.user = uuidv4();
 
   delete (config as any).model_selection;
+
+  // Load the reCAPTCHA script and get the token
+  const recaptcha = await load('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup');
+  const recaptchaToken = await recaptcha.execute('submit');
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -95,6 +89,8 @@ export const getChatCompletionStream = async (
       messages,
       ...config,
       stream: true,
+      session: sessionCookie,
+      recaptcha_token: recaptchaToken,
     }),
   });
   if (response.status === 404 || response.status === 405) {
