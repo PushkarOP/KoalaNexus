@@ -50,7 +50,7 @@ export const createConfigSlice: StoreSlice<ConfigSlice> = (set) => ({
   advancedMode: true,
   defaultChatConfig: _defaultChatConfig,
   defaultSystemMessage: _defaultSystemMessage,
-  inlineLatex: false,
+  inlineLatex: true,
   markdownMode: true,
   countTotalTokens: false,
   totalTokenUsed: {},
