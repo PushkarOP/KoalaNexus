@@ -60,30 +60,6 @@ const ModelConfigBar = React.memo(() => {
               showHidden={false}
             />
           </div>
-          <div
-            className='text-center p-1.5 rounded-md btn-neutral cursor-pointer'
-            onClick={() => {
-              setIsModalOpen(true);
-            }}
-          >
-            {t('token.label')}: {config.max_tokens}
-          </div>
-          <div
-            className='text-center p-1.5 rounded-md btn-neutral cursor-pointer'
-            onClick={() => {
-              setIsModalOpen(true);
-            }}
-          >
-            {t('temperature.label')}: {config.temperature}
-          </div>
-          <div
-            className='text-center p-1.5 rounded-md btn-neutral cursor-pointer'
-            onClick={() => {
-              setIsModalOpen(true);
-            }}
-          >
-            {t('topP.label')}: {config.top_p}
-          </div>
         </div>
       </div>
       {isModalOpen && (

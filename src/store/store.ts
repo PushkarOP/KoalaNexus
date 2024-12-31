@@ -47,7 +47,7 @@ export const createPartializedState = (state: StoreState) => ({
   apiAuth: state.apiAuth,
   modelDefs: state.modelDefs,
   theme: state.theme,
-  autoTitle: state.autoTitle,
+  autoTitle: false,
   closeToTray: state.closeToTray,
   advancedMode: state.advancedMode,
   prompts: state.prompts,
