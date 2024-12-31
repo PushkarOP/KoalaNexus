@@ -10,10 +10,6 @@ const MenuOptions = () => {
   return (
     <>
       <div className={`max-h-full py-1 overflow-hidden transition-all`}>
-        {!isElectron() && <DesktopLink />}
-        {!isElectron() && googleClientId && (
-          <GoogleSync clientId={googleClientId} />
-        )}
         <SettingsMenu />
       </div>
     </>

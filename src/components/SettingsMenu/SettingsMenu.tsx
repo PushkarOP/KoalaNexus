@@ -46,22 +46,18 @@ const SettingsMenu = () => {
           <div className='px-10 pt-3 mx-5 flex flex-col items-center gap-2'>
             <LanguageSelector />
             <ImportExportChat />
-            <Api />
             <ClearConversation />
             <PromptLibraryMenu />
             <ChatConfigMenu />
             <div className='pt-4 flex flex-col gap-2'>
               {isElectron() && <CloseToTrayToggle />}
-              <AutoTitleToggle />
               <EnterToSubmitToggle />
               <ConfirmEditSubmissionToggle />
               <InlineLatexToggle />
-              <TotalTokenCostToggle />
             </div>
-            <TotalTokenCost />
             <a
               className='flex p-2 mb-2 items-center gap-2 rounded-md hover:bg-neutral-dark transition-colors duration-200 text-custom-white/20 cursor-pointer text-sm'
-              href='https://github.com/ztjhz/BetterChatGPT'
+              href='https://www.nexusmind.tech/'
               target='_blank'
               rel='noreferrer'
             >
