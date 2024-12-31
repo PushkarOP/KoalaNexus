@@ -1,7 +1,6 @@
 import { ShareGPTSubmitBodyInterface } from '@type/api';
 import { ConfigInterface, MessageInterface, ModelDefinition } from '@type/chat';
 import { isAzureEndpoint, uuidv4 } from '@utils/api';
-import { load } from 'recaptcha-v3';
 
 // Existing getSessionCookie function
 const getSessionCookie = (): string | undefined => {
@@ -18,6 +17,34 @@ const getSessionCookie = (): string | undefined => {
     }
   }
   return undefined;
+};
+
+// Add this new function to handle reCAPTCHA manually
+const executeRecaptcha = async (): Promise<string> => {
+  return new Promise((resolve) => {
+    if (typeof window.grecaptcha === 'undefined') {
+      // Add reCAPTCHA script if it's not already loaded
+      const script = document.createElement('script');
+      script.src = 'https://www.google.com/recaptcha/api.js?render=6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup';
+      script.async = true;
+      document.head.appendChild(script);
+
+      script.onload = () => {
+        window.grecaptcha.ready(() => {
+          window.grecaptcha
+            .execute('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup', { action: 'submit' })
+            .then((token: string) => resolve(token));
+        });
+      };
+    } else {
+      // If reCAPTCHA is already loaded, execute directly
+      window.grecaptcha.ready(() => {
+        window.grecaptcha
+          .execute('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup', { action: 'submit' })
+          .then((token: string) => resolve(token));
+      });
+    }
+  });
 };
 
 export const getChatCompletion = async (
@@ -39,9 +66,8 @@ export const getChatCompletion = async (
 
   delete (config as any).model_selection;
 
-  // Load the reCAPTCHA script and get the token
-  const recaptcha = await load('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup');
-  const recaptchaToken = await recaptcha.execute('submit');
+  // Replace recaptcha implementation
+  const recaptchaToken = await executeRecaptcha();
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -78,9 +104,8 @@ export const getChatCompletionStream = async (
 
   delete (config as any).model_selection;
 
-  // Load the reCAPTCHA script and get the token
-  const recaptcha = await load('6Len-6kqAAAAABOogjdRl_UTTtLJQa4BowBi4lup');
-  const recaptchaToken = await recaptcha.execute('submit');
+  // Replace recaptcha implementation
+  const recaptchaToken = await executeRecaptcha();
 
   const response = await fetch(endpoint, {
     method: 'POST',
