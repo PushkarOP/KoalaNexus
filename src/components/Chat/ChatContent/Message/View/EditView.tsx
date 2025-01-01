@@ -284,11 +284,6 @@ const EditViewButtons = memo(
         </div>
         <div className='flex-1 flex items-center justify-end'>
           {sticky && <TokenCount />}
-          <WhisperRecord
-            cursorPosition={cursorPosition}
-            _setContent={_setContent}
-            messageIndex={messageIndex}
-          />
           <CommandPrompt
             cursorPosition={cursorPosition}
             _setContent={_setContent}
