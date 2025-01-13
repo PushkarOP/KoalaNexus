@@ -150,6 +150,16 @@ function App() {
         swap_visible: true,
       },
       {
+        name: 'gemini-uncensored',
+        model: 'gemini-unlocked',
+        endpoint: 0,
+        model_max_context: 128000,
+        model_max_tokens: 4096,
+        prompt_cost_1000: 0.1,
+        completion_cost_1000: 0.3,
+        swap_visible: true,
+      },
+      {
         name: 'gemini-2.0-flash-exp',
         model: 'gemini-2.0-flash-exp',
         endpoint: 0,
