@@ -82,6 +82,11 @@ const useStore = create<StoreState>()(
       version: 9,
       migrate: (persistedState, version) => {
         const state = persistedState as StoreState;
+        
+        if (JSON.stringify(state.modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS)) {
+          state.modelDefs = DEFAULT_MODEL_DEFS;
+        }
+        
         switch (version) {
           case 0:
             migrateV0(persistedState as LocalStorageInterfaceV0ToV1);
