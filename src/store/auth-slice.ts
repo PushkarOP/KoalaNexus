@@ -192,8 +192,9 @@ export const createAuthSlice: StoreSlice<AuthSlice> = (set) => ({
   },
   setModelDefs: (modelDefs: ModelDefinition[]) => {
     // Compare the current modelDefs with DEFAULT_MODEL_DEFS
-    const needsUpdate = JSON.stringify(modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS);
-    
+    const needsUpdate =
+      JSON.stringify(modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS);
+
     set((prev: AuthSlice) => ({
       ...prev,
       // If models need updating, use DEFAULT_MODEL_DEFS, otherwise keep existing
