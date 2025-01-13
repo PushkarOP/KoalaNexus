@@ -2,7 +2,7 @@ import { create, StoreApi } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ChatSlice, createChatSlice } from './chat-slice';
 import { createInputSlice, InputSlice } from './input-slice';
-import { AuthSlice, createAuthSlice } from './auth-slice';
+import { AuthSlice, createAuthSlice, DEFAULT_MODEL_DEFS } from './auth-slice';
 import { ConfigSlice, createConfigSlice } from './config-slice';
 import { createPromptSlice, PromptSlice } from './prompt-slice';
 import { createToastSlice, ToastSlice } from './toast-slice';

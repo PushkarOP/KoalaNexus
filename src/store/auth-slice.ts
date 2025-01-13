@@ -15,7 +15,7 @@ export interface AuthSlice {
 }
 
 // Store the default model definitions in a constant
-const DEFAULT_MODEL_DEFS: ModelDefinition[] = [
+export const DEFAULT_MODEL_DEFS: ModelDefinition[] = [
   {
     name: 'gpt-4o',
     model: 'gpt-4o',
