@@ -157,6 +157,16 @@ export const DEFAULT_MODEL_DEFS: ModelDefinition[] = [
     swap_visible: true,
   },
   {
+    name: 'deepseek-reasoner',
+    model: 'deepseek-reasoner',
+    endpoint: 0,
+    model_max_context: 128000,
+    model_max_tokens: 4096,
+    prompt_cost_1000: 0.1,
+    completion_cost_1000: 0.3,
+    swap_visible: true,
+  },
+  {
     name: 'codestral-latest',
     model: 'codestral-latest',
     endpoint: 0,
