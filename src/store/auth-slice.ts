@@ -213,7 +213,7 @@ export const createAuthSlice: StoreSlice<AuthSlice> = (set) => ({
   setModelDefs: (modelDefs: ModelDefinition[]) => {
     set((prev: AuthSlice) => ({
       ...prev,
-      modelDefs: DEFAULT_MODEL_DEFS,  // Always use DEFAULT_MODEL_DEFS to ensure latest models
+      modelDefs: DEFAULT_MODEL_DEFS, // Always use DEFAULT_MODEL_DEFS to ensure latest models
     }));
   },
 });
