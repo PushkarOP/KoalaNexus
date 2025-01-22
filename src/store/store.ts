@@ -83,11 +83,12 @@ const useStore = create<StoreState>()(
       migrate: (persistedState, version) => {
         const state = persistedState as StoreState;
 
-        // Force update modelDefs if they don't match DEFAULT_MODEL_DEFS
-        const needsModelUpdate = 
-          JSON.stringify(state.modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS);
-        if (needsModelUpdate) {
-          state.modelDefs = [...DEFAULT_MODEL_DEFS];
+        if (
+          !state.modelDefs ||
+          state.modelDefs.length !== DEFAULT_MODEL_DEFS.length ||
+          JSON.stringify(state.modelDefs.map(m => m.model)) !== JSON.stringify(DEFAULT_MODEL_DEFS.map(m => m.model))
+        ) {
+          state.modelDefs = DEFAULT_MODEL_DEFS;
         }
 
         switch (version) {
@@ -123,8 +124,6 @@ const useStore = create<StoreState>()(
           ...createPartializedState({} as StoreState),
           ...state,
           autoTitle: false,
-          // Ensure modelDefs is set to DEFAULT_MODEL_DEFS in final state
-          modelDefs: DEFAULT_MODEL_DEFS,
         };
       },
     }
