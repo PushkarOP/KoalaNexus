@@ -80,14 +80,13 @@ const useStore = create<StoreState>()(
       name: 'free-chat-gpt',
       partialize: (state) => createPartializedState(state),
       version: 9,
-      migrate: (persistedState, version) => {
-        const state = persistedState as StoreState;
-
-        if (
-          JSON.stringify(state.modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS)
-        ) {
+      onRehydrateStorage: () => (state) => {
+        if (state && JSON.stringify(state.modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS)) {
           state.modelDefs = DEFAULT_MODEL_DEFS;
         }
+      },
+      migrate: (persistedState, version) => {
+        const state = persistedState as StoreState;
 
         switch (version) {
           case 0:
