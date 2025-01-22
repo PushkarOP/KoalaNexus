@@ -84,8 +84,9 @@ const useStore = create<StoreState>()(
         const state = persistedState as StoreState;
 
         // Force update modelDefs if they don't match DEFAULT_MODEL_DEFS
-        const needsModelUpdate = 
-          JSON.stringify(state.modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS);
+        const needsModelUpdate =
+          JSON.stringify(state.modelDefs) !==
+          JSON.stringify(DEFAULT_MODEL_DEFS);
         if (needsModelUpdate) {
           state.modelDefs = [...DEFAULT_MODEL_DEFS];
         }
