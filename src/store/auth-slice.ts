@@ -211,9 +211,14 @@ export const createAuthSlice: StoreSlice<AuthSlice> = (set) => ({
     }));
   },
   setModelDefs: (modelDefs: ModelDefinition[]) => {
+    // Compare the current modelDefs with DEFAULT_MODEL_DEFS
+    const needsUpdate =
+      JSON.stringify(modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS);
+
     set((prev: AuthSlice) => ({
       ...prev,
-      modelDefs: DEFAULT_MODEL_DEFS,  // Always use DEFAULT_MODEL_DEFS to ensure latest models
+      // Use DEFAULT_MODEL_DEFS when there's a mismatch
+      modelDefs: needsUpdate ? DEFAULT_MODEL_DEFS : modelDefs,
     }));
   },
 });
