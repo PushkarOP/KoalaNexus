@@ -83,11 +83,8 @@ const useStore = create<StoreState>()(
       migrate: (persistedState, version) => {
         const state = persistedState as StoreState;
 
-        // Check if modelDefs exists and has different length or content
         if (
-          !state.modelDefs ||
-          state.modelDefs.length !== DEFAULT_MODEL_DEFS.length ||
-          JSON.stringify(state.modelDefs.map(m => m.model)) !== JSON.stringify(DEFAULT_MODEL_DEFS.map(m => m.model))
+          JSON.stringify(state.modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS)
         ) {
           state.modelDefs = DEFAULT_MODEL_DEFS;
         }
