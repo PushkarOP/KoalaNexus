@@ -8,7 +8,7 @@ const executeRecaptcha = async (action: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     grecaptcha.ready(() => {
       grecaptcha
-        .execute('6LfqzLQqAAAAAImngXFCl6xZCroCZHnih3_YObLW', { action })
+        .execute('6Ldfb8AqAAAAAM1WX3STeRcadjTi8OhPZPFKOazl', { action })
         .then((token: string) => {
           resolve(token);
         })
