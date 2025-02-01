@@ -37,16 +37,21 @@ jobs:
         run: pnpm install
 
       - name: Build website
-        run: pnpm build
+        run: pnpm build || exit 1
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
+
+      - name: Check dist folder
+        run: ls -l ./dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
+          name: github-pages
           path: './dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
+        with:
+          artifact_name: github-pages
