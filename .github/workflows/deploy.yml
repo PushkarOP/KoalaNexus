@@ -41,6 +41,10 @@ jobs:
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
 
+      # Optional: List the generated files to help debug
+      - name: List built files
+        run: ls -la ./dist
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
