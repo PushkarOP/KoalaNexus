@@ -48,7 +48,7 @@ jobs:
           [ -f dist/index.html ] || exit 1  # Fail if no index.html
           
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2  # Changed from upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: github-pages
           path: ./dist
