@@ -37,6 +37,16 @@ export const DEFAULT_MODEL_DEFS: ModelDefinition[] = [
     swap_visible: true,
   },
   {
+    name: 'o3-mini',
+    model: 'o3-mini',
+    endpoint: 0,
+    model_max_context: 128000,
+    model_max_tokens: 4096,
+    prompt_cost_1000: 0.5,
+    completion_cost_1000: 0.5,
+    swap_visible: true,
+  },
+  {
     name: 'o1-preview',
     model: 'o1-preview',
     endpoint: 0,
@@ -52,8 +62,8 @@ export const DEFAULT_MODEL_DEFS: ModelDefinition[] = [
     endpoint: 0,
     model_max_context: 128000,
     model_max_tokens: 4096,
-    prompt_cost_1000: 0.1,
-    completion_cost_1000: 0.3,
+    prompt_cost_1000: 0.5,
+    completion_cost_1000: 0.5,
     swap_visible: true,
   },
   {
@@ -157,7 +167,7 @@ export const DEFAULT_MODEL_DEFS: ModelDefinition[] = [
     swap_visible: true,
   },
   {
-    name: 'deepseek-reasoner',
+    name: 'deepseek-r1',
     model: 'deepseek-reasoner',
     endpoint: 0,
     model_max_context: 128000,
