@@ -47,7 +47,13 @@ jobs:
         with:
           name: artifact
           path: ./dist
-
+          
+      - name: Download uploaded artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact  # Ensure this matches the uploaded artifact name
+          path: ./dist  # Extract files to the correct directory
+    
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
