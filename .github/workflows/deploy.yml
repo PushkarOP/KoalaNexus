@@ -40,7 +40,13 @@ jobs:
         run: pnpm build
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
-
+          
+      - name: Verify build output
+        run: |
+          echo "Build directory contents:"
+          ls -la dist
+          [ -f dist/index.html ] || exit 1  # Fail if no index.html
+          
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2  # Changed from upload-artifact@v4
         with:
