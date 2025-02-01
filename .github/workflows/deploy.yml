@@ -44,7 +44,7 @@ jobs:
             exit 1
           fi
         env:
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
+          VITE_GOOGLE_CLIENT_ID: "${{ secrets.GCLIENT }}"
 
       - name: Debug: Check dist folder
         run: |
