@@ -37,33 +37,15 @@ jobs:
         run: pnpm install
 
       - name: Build website
-        run: |
-          pnpm build
-          if [ $? -ne 0 ]; then
-            echo "❌ Build failed"
-            exit 1
-          fi
+        run: pnpm build
         env:
-          VITE_GOOGLE_CLIENT_ID: "${{ secrets.GCLIENT }}"
-
-      - name: Debug: Check dist folder
-        run: |
-          echo "Checking dist folder..."
-          ls -l ./dist || echo "⚠️ dist folder not found!"
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v1
         with:
-          name: github-pages
           path: './dist'
-
-      - name: Debug: Verify uploaded artifact
-        run: |
-          echo "Checking uploaded artifact..."
-          ls -l ./dist || echo "⚠️ dist folder not found!"
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
-        with:
-          artifact_name: github-pages
