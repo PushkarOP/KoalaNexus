@@ -17,6 +17,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v3
 
@@ -38,25 +41,12 @@ jobs:
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
 
-      # Optional: List files for debugging
-      - name: List built files
-        run: ls -la ./dist
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: artifact
-          path: ./dist/
-          
-      - name: Download uploaded artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: artifact  # Ensure this matches the uploaded artifact name
-          path: ./dist  # Extract files to the correct directory
-    
+          name: github-pages
+          path: ./dist
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
-        with:
-          artifact_name: artifact  # Ensure this matches the uploaded artifact name
-
