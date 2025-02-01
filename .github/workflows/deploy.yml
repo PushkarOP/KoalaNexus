@@ -38,7 +38,11 @@ jobs:
 
       - name: Build website
         run: |
-          pnpm build || { echo "❌ Build failed"; exit 1; }
+          pnpm build
+          if [ $? -ne 0 ]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
 
