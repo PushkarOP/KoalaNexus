@@ -17,10 +17,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      artifact-name: github-pages
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Use Node.js 22
         uses: actions/setup-node@v3
@@ -40,6 +39,9 @@ jobs:
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
 
+      - name: List dist folder (debug)
+        run: ls -la ./dist
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -47,8 +49,8 @@ jobs:
           path: ./dist
 
   deploy:
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
     steps:
