@@ -18,17 +18,17 @@ export interface AuthSlice {
 export const createAuthSlice: StoreSlice<AuthSlice> = (set) => ({
   firstVisit: true,
   apiAuth: [{ endpoint: defaultAPIEndpoint, apiKey: '' }],
-  modelDefs: [],
+  modelDefs: DEFAULT_MODEL_DEFS,
   setApiKey: (apiKey: string) => {
     set((prev: AuthSlice) => ({
       ...prev,
-      apiKey: apiKey,
+      apiKey,
     }));
   },
   setFirstVisit: (firstVisit: boolean) => {
     set((prev: AuthSlice) => ({
       ...prev,
-      firstVisit: firstVisit,
+      firstVisit,
     }));
   },
   setApiAuth: (apiAuth: EndpointAuth[]) => {
@@ -37,23 +37,10 @@ export const createAuthSlice: StoreSlice<AuthSlice> = (set) => ({
       apiAuth,
     }));
   },
-  setModelDefs: (modelDefs: ModelDefinition[]) => {
-    if (!modelDefs || modelDefs.length === 0) {
-      set((prev: AuthSlice) => ({
-        ...prev,
-        modelDefs: DEFAULT_MODEL_DEFS,
-      }));
-      return;
-    }
-
-    const needsUpdate = modelDefs.some((model, index) => {
-      const defaultModel = DEFAULT_MODEL_DEFS[index];
-      return !defaultModel || model.model !== defaultModel.model;
-    });
-
+  setModelDefs: (_modelDefs: ModelDefinition[]) => {
     set((prev: AuthSlice) => ({
       ...prev,
-      modelDefs: needsUpdate ? DEFAULT_MODEL_DEFS : modelDefs,
+      modelDefs: DEFAULT_MODEL_DEFS,
     }));
   },
 });

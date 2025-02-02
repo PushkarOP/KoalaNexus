@@ -61,11 +61,10 @@ const useStore = create<StoreState>()(
       version: 9,
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-  
+
         setTimeout(() => {
-          if (state && (!state.modelDefs || state.modelDefs.length === 0)) {
-            state.setModelDefs(DEFAULT_MODEL_DEFS);
-          }
+          // Enforce DEFAULT_MODEL_DEFS on every rehydration.
+          state.setModelDefs(DEFAULT_MODEL_DEFS);
         }, 0);
       },
       migrate: (persistedState, version) => {
@@ -73,6 +72,7 @@ const useStore = create<StoreState>()(
         return {
           ...createPartializedState({} as StoreState),
           ...stateObj,
+          modelDefs: DEFAULT_MODEL_DEFS, // Override persisted modelDefs with defaults.
           autoTitle: false,
         };
       },
