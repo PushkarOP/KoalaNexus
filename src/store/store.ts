@@ -81,9 +81,13 @@ const useStore = create<StoreState>()(
       partialize: (state) => createPartializedState(state),
       version: 9,
       onRehydrateStorage: () => (state) => {
-        if (state && JSON.stringify(state.modelDefs) !== JSON.stringify(DEFAULT_MODEL_DEFS)) {
-          state.modelDefs = DEFAULT_MODEL_DEFS;
-        }
+        if (!state) return;
+        
+        setTimeout(() => {
+          if (state && (!state.modelDefs || state.modelDefs.length === 0)) {
+            state.setModelDefs(DEFAULT_MODEL_DEFS);
+          }
+        }, 0);
       },
       migrate: (persistedState, version) => {
         const state = persistedState as StoreState;

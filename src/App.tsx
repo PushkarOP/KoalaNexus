@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import useStore from '@store/store';
 import i18n from './i18n';
 
-import Chat from '@components/Chat';
-import Menu from '@components/Menu';
+// Lazy load components
+const Chat = lazy(() => import('@components/Chat'));
+const Menu = lazy(() => import('@components/Menu'));
+const Toast = lazy(() => import('@components/Toast'));
 
 import useAddChat from '@hooks/useAddChat';
 import useGoBack from '@hooks/useGoBack';
@@ -12,7 +14,6 @@ import useCopyCodeBlock from '@hooks/useCopyCodeBlock';
 import useInitialiseNewChat from '@hooks/useInitialiseNewChat';
 import useSubmit from '@hooks/useSubmit';
 import { ChatInterface } from '@type/chat';
-import Toast from '@components/Toast';
 import isElectron, { isMac } from '@utils/electron';
 
 function App() {
@@ -411,9 +412,11 @@ function App() {
       onKeyDown={handleKeyDown}
       onMouseUp={handleMouseUp}
     >
-      <Menu />
-      <Chat />
-      <Toast />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Menu />
+        <Chat />
+        <Toast />
+      </Suspense>
     </div>
   );
 }
