@@ -5,15 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,7 +12,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Use Node.js 22
+      - name: Setup Node.js 22
         uses: actions/setup-node@v3
         with:
           node-version: 22
@@ -39,23 +30,26 @@ jobs:
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
 
+      # (Optional) List the contents of the build output for debugging.
       - name: List contents of dist folder (debug)
         run: ls -la ./dist
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      # Upload the build output as a Pages artifact.
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          name: github-pages
           path: ./dist
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write      # required for deploying to GitHub Pages
+      id-token: write   # required for OIDC token generation
     environment:
       name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
-        with:
-          artifact_name: "github-pages"
+        uses: actions/deploy-pages@v4
