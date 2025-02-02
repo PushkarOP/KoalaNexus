@@ -61,7 +61,7 @@ const useStore = create<StoreState>()(
       version: 9,
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        
+  
         setTimeout(() => {
           if (state && (!state.modelDefs || state.modelDefs.length === 0)) {
             state.setModelDefs(DEFAULT_MODEL_DEFS);
@@ -69,9 +69,10 @@ const useStore = create<StoreState>()(
         }, 0);
       },
       migrate: (persistedState, version) => {
+        const stateObj = (persistedState as Record<string, unknown>) || {};
         return {
           ...createPartializedState({} as StoreState),
-          ...persistedState,
+          ...stateObj,
           autoTitle: false,
         };
       },
