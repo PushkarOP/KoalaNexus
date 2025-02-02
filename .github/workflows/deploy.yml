@@ -38,7 +38,7 @@ jobs:
       - name: Upload Pages Artifact
         uses: actions/upload-artifact@v4
         with:
-          artifact_name: "artifact"          # Ensure this matches the deploy step artifact_name
+          name: "artifact"          # Ensure this matches the deploy step artifact_name
           path: ./dist
 
   deploy:
