@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages'
+  group: pages
   cancel-in-progress: true
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
         env:
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
 
-      - name: List dist folder (debug)
+      - name: List contents of dist folder (debug)
         run: ls -la ./dist
 
       - name: Upload artifact
@@ -54,6 +54,19 @@ jobs:
     environment:
       name: github-pages
     steps:
+      # Optional: Download artifact to confirm it exists.
+      - name: Download artifact (debug)
+        uses: actions/download-artifact@v3
+        with:
+          name: github-pages
+          path: ./downloaded
+
+      # List downloaded artifact contents for debugging.
+      - name: List downloaded artifact
+        run: ls -la ./downloaded
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
+        with:
+          artifact-name: github-pages
