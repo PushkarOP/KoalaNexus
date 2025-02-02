@@ -5,59 +5,41 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build website
-        run: pnpm build
-        env:
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
-
-      - name: List contents of dist folder (debug)
-        run: ls -la ./dist
-
-      - name: Remove symlinks from dist
-        run: find ./dist -type l -delete
-
-      # **Upload the artifact as a folder, not tar.gz**
-      - name: Upload Pages Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: github-pages
-          path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
         with:
-          name: github-pages
-          path: ./dist
+          node-version: 18
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build website
+        run: yarn build
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.GCLIENT }}
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: './dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
