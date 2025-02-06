@@ -100,6 +100,18 @@ const useSubmit = () => {
       }
 
       if (stream) {
+        let accumulatedChunk = "";
+        let throttlingTimer: number | null = null;
+
+        const updateAssistantMessage = () => {
+          const updatedChats: ChatInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
+          const updatedMessages = updatedChats[currentChatIndex].messages;
+          updatedMessages[updatedMessages.length - 1].content += accumulatedChunk;
+          accumulatedChunk = "";
+          setChats(updatedChats);
+          throttlingTimer = null;
+        };
+
         async function* streamGenerator(
           stream: ReadableStream<Uint8Array>
         ): AsyncGenerator<string> {
@@ -113,12 +125,17 @@ const useSubmit = () => {
               partial += decoder.decode(value, { stream: true });
               const results = parseEventSource(partial);
               partial = '';
-              if (results === '[DONE]') break;
-              for (const res of results) {
-                if (typeof res === 'string') {
-                  yield res;
-                } else if (res.choices && res.choices[0].delta.content) {
-                  yield res.choices[0].delta.content;
+              if (typeof results === 'string') {
+                if (results === '[DONE]') break;
+                yield results;
+              } else if (Array.isArray(results)) {
+                for (const res of results) {
+                  if (typeof res === 'string') {
+                    if (res === '[DONE]') continue;
+                    yield res;
+                  } else if (res.choices && res.choices[0].delta.content) {
+                    yield res.choices[0].delta.content;
+                  }
                 }
               }
             }
@@ -128,10 +145,15 @@ const useSubmit = () => {
         }
 
         for await (const chunk of streamGenerator(stream)) {
-          const updatedChats: ChatInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
-          const updatedMessages = updatedChats[currentChatIndex].messages;
-          updatedMessages[updatedMessages.length - 1].content += chunk;
-          setChats(updatedChats);
+          accumulatedChunk += chunk;
+          if (!throttlingTimer) {
+            throttlingTimer = window.setTimeout(() => {
+              updateAssistantMessage();
+            }, 50);
+          }
+        }
+        if (accumulatedChunk) {
+          updateAssistantMessage();
         }
         stream.cancel();
       }
