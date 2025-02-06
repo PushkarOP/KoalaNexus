@@ -148,13 +148,22 @@ const useSubmit = () => {
               break;
             }
             const result = parseEventSource(event);
-            const resultString = result.reduce((output: string, curr) => {
-              if (typeof curr !== 'string') {
-                const content = curr.choices[0].delta.content;
-                if (content) output += content;
-              }
-              return output;
-            }, '');
+            let resultString = '';
+            if (Array.isArray(result)) {
+              resultString = result.reduce(
+                (
+                  output: string,
+                  curr: { choices: { delta: { content?: string } }[] }
+                ) => {
+                  if (curr.choices?.[0]?.delta) {
+                    const content = curr.choices[0].delta.content;
+                    if (content) output += content;
+                  }
+                  return output;
+                },
+                ''
+              );
+            }
             const updatedChats: ChatInterface[] = JSON.parse(
               JSON.stringify(useStore.getState().chats)
             );
