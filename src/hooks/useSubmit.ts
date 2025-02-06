@@ -127,11 +127,13 @@ const useSubmit = () => {
               partial = '';
               if (typeof results === 'string') {
                 if (results === '[DONE]') break;
+                if (results.trim().startsWith('{"id":')) continue;
                 yield results;
               } else if (Array.isArray(results)) {
                 for (const res of results) {
                   if (typeof res === 'string') {
                     if (res === '[DONE]') continue;
+                    if (res.trim().startsWith('{"id":')) continue;
                     yield res;
                   } else if (res.choices && res.choices[0].delta.content) {
                     yield res.choices[0].delta.content;
