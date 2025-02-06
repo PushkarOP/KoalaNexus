@@ -64,25 +64,17 @@ const useSubmit = () => {
     if (generating || !chats) return;
 
     const updatedChats: ChatInterface[] = JSON.parse(JSON.stringify(chats));
-
-    updatedChats[currentChatIndex].messages.push({
-      role: 'assistant',
-      content: '',
-    });
-
+    updatedChats[currentChatIndex].messages.push({ role: 'assistant', content: '' });
     setChats(updatedChats);
     setGenerating(true);
 
     const config = chats[currentChatIndex].config;
-
     try {
-      let stream;
       if (chats[currentChatIndex].messages.length === 0) {
         throw new Error('No messages submitted!');
       }
 
       const modelDef = modelDefs[config.model_selection];
-
       const auth = apiAuth[modelDef.endpoint];
       const apiKey = auth.apiKey;
       const apiEndpoint = auth.endpoint;
@@ -94,83 +86,56 @@ const useSubmit = () => {
         config.max_tokens
       );
       if (messages.length === 0) throw new Error('Message exceeds max token!');
-
-      // javascript is an abomination
       delete (config as any).max_context;
       (config as any).model = modelDef.model;
 
-      // no api key (free)
+      let stream;
       if (!apiKey || apiKey.length === 0) {
-        // official endpoint
         if (apiEndpoint === officialAPIEndpoint) {
           throw new Error(t('noApiKeyWarning') as string);
         }
-
-        // other endpoints
-        stream = await getChatCompletionStream(
-          apiEndpoint,
-          messages,
-          config,
-          modelDef
-        );
-      } else if (apiKey) {
-        // own apikey
-        stream = await getChatCompletionStream(
-          apiEndpoint,
-          messages,
-          config,
-          modelDef,
-          apiKey
-        );
+        stream = await getChatCompletionStream(apiEndpoint, messages, config, modelDef);
+      } else {
+        stream = await getChatCompletionStream(apiEndpoint, messages, config, modelDef, apiKey);
       }
 
       if (stream) {
-        if (stream.locked) {
-          throw new Error(
-            'Oops, the stream is locked right now. Please try again'
-          );
-        }
-        const reader = stream.getReader();
-        let reading = true;
-        let partial = '';
-        while (reading && useStore.getState().generating) {
-          const { done, value } = await reader.read();
-          const result = parseEventSource(
-            partial + new TextDecoder().decode(value)
-          );
-          partial = '';
-
-          if (result === '[DONE]' || done) {
-            reading = false;
-          } else {
-            const resultString = result.reduce((output: string, curr) => {
-              if (typeof curr === 'string') {
-                partial += curr;
-              } else {
-                const content = curr.choices[0].delta.content;
-                if (content) output += content;
+        async function* streamGenerator(
+          stream: ReadableStream<Uint8Array>
+        ): AsyncGenerator<string> {
+          const reader = stream.getReader();
+          const decoder = new TextDecoder();
+          let partial = '';
+          try {
+            while (useStore.getState().generating) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              partial += decoder.decode(value, { stream: true });
+              const results = parseEventSource(partial);
+              partial = '';
+              if (results === '[DONE]') break;
+              for (const res of results) {
+                if (typeof res === 'string') {
+                  yield res;
+                } else if (res.choices && res.choices[0].delta.content) {
+                  yield res.choices[0].delta.content;
+                }
               }
-              return output;
-            }, '');
-
-            const updatedChats: ChatInterface[] = JSON.parse(
-              JSON.stringify(useStore.getState().chats)
-            );
-            const updatedMessages = updatedChats[currentChatIndex].messages;
-            updatedMessages[updatedMessages.length - 1].content += resultString;
-            setChats(updatedChats);
+            }
+          } finally {
+            reader.releaseLock();
           }
         }
-        if (useStore.getState().generating) {
-          reader.cancel('Cancelled by user');
-        } else {
-          reader.cancel('Generation completed');
+
+        for await (const chunk of streamGenerator(stream)) {
+          const updatedChats: ChatInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
+          const updatedMessages = updatedChats[currentChatIndex].messages;
+          updatedMessages[updatedMessages.length - 1].content += chunk;
+          setChats(updatedChats);
         }
-        reader.releaseLock();
         stream.cancel();
       }
 
-      // update tokens used in chatting
       const currChats = useStore.getState().chats;
       const countTotalTokens = useStore.getState().countTotalTokens;
 
@@ -184,7 +149,6 @@ const useSubmit = () => {
         );
       }
 
-      // generate title for new chats
       if (
         useStore.getState().autoTitle &&
         currChats &&
@@ -192,7 +156,6 @@ const useSubmit = () => {
       ) {
         const messages_length = currChats[currentChatIndex].messages.length;
 
-        // only first 800 chars of each message
         const assistant_message = currChats[currentChatIndex].messages[
           messages_length - 1
         ].content.slice(0, 800);
@@ -218,7 +181,6 @@ const useSubmit = () => {
         updatedChats[currentChatIndex].titleSet = true;
         setChats(updatedChats);
 
-        // update tokens used for generating title
         if (countTotalTokens) {
           updateTotalTokenUsed(0, [message], {
             role: 'assistant',
