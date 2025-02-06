@@ -135,29 +135,34 @@ const useSubmit = () => {
         let partial = '';
         while (reading && useStore.getState().generating) {
           const { done, value } = await reader.read();
+          
+          if (done) {
+            reading = false;
+            break;
+          }
+
           const result = parseEventSource(partial + new TextDecoder().decode(value));
           partial = '';
 
-          if (result === '[DONE]' || done) {
+          if (result === '[DONE]') {
             reading = false;
           } else {
-            const resultString = result.reduce((output: string, curr) => {
-              if (typeof curr === 'string') {
-                partial = curr;
-                return output;
-              } else {
-                const content = curr.choices[0].delta.content;
-                if (content) output += content;
+            let accumulatedContent = '';
+            
+            for (const item of result) {
+              if (typeof item === 'string') {
+                partial = item;
+              } else if (item.choices?.[0]?.delta?.content) {
+                accumulatedContent += item.choices[0].delta.content;
               }
-              return output;
-            }, '');
+            }
 
-            if (resultString) {
+            if (accumulatedContent) {
               const updatedChats: ChatInterface[] = JSON.parse(
                 JSON.stringify(useStore.getState().chats)
               );
               const updatedMessages = updatedChats[currentChatIndex].messages;
-              updatedMessages[updatedMessages.length - 1].content += resultString;
+              updatedMessages[updatedMessages.length - 1].content += accumulatedContent;
               setChats(updatedChats);
             }
           }
