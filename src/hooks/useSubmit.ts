@@ -123,16 +123,15 @@ const useSubmit = () => {
           apiKey
         );
       }
-
+      
       if (stream) {
         if (stream.locked) {
-          throw new Error(
-            'Oops, the stream is locked right now. Please try again'
-          );
+          throw new Error('Oops, the stream is locked right now. Please try again');
         }
         const reader = stream.getReader();
         let reading = true;
-        let partial = '';
+        let buffer = '';
+
         while (reading && useStore.getState().generating) {
           const { done, value } = await reader.read();
           
@@ -141,21 +140,29 @@ const useSubmit = () => {
             break;
           }
 
-          const result = parseEventSource(partial + new TextDecoder().decode(value));
-          partial = '';
-
+          // Append new chunk to buffer and process
+          buffer += new TextDecoder().decode(value);
+          
+          // Process complete events from buffer
+          const result = parseEventSource(buffer);
+          
           if (result === '[DONE]') {
             reading = false;
           } else {
             let accumulatedContent = '';
+            let lastIncompleteChunk = '';
             
             for (const item of result) {
               if (typeof item === 'string') {
-                partial = item;
+                // Store incomplete chunk for next iteration
+                lastIncompleteChunk = item;
               } else if (item.choices?.[0]?.delta?.content) {
                 accumulatedContent += item.choices[0].delta.content;
               }
             }
+
+            // Update buffer to only contain the incomplete chunk
+            buffer = lastIncompleteChunk;
 
             if (accumulatedContent) {
               const updatedChats: ChatInterface[] = JSON.parse(
@@ -168,13 +175,24 @@ const useSubmit = () => {
           }
         }
 
-        if (partial) {
-          const updatedChats: ChatInterface[] = JSON.parse(
-            JSON.stringify(useStore.getState().chats)
-          );
-          const updatedMessages = updatedChats[currentChatIndex].messages;
-          updatedMessages[updatedMessages.length - 1].content += partial;
-          setChats(updatedChats);
+        // Handle any remaining content in buffer
+        if (buffer) {
+          const result = parseEventSource(buffer);
+          if (Array.isArray(result)) {
+            const remainingContent = result
+              .filter(item => typeof item !== 'string' && item.choices?.[0]?.delta?.content)
+              .map(item => (item as any).choices[0].delta.content)
+              .join('');
+
+            if (remainingContent) {
+              const updatedChats: ChatInterface[] = JSON.parse(
+                JSON.stringify(useStore.getState().chats)
+              );
+              const updatedMessages = updatedChats[currentChatIndex].messages;
+              updatedMessages[updatedMessages.length - 1].content += remainingContent;
+              setChats(updatedChats);
+            }
+          }
         }
 
         if (useStore.getState().generating) {
