@@ -64,14 +64,17 @@ const useSubmit = () => {
     if (generating || !chats) return;
 
     const updatedChats: ChatInterface[] = JSON.parse(JSON.stringify(chats));
+
     updatedChats[currentChatIndex].messages.push({
       role: 'assistant',
       content: '',
     });
+
     setChats(updatedChats);
     setGenerating(true);
 
     const config = chats[currentChatIndex].config;
+
     try {
       let stream;
       if (chats[currentChatIndex].messages.length === 0) {
@@ -79,6 +82,7 @@ const useSubmit = () => {
       }
 
       const modelDef = modelDefs[config.model_selection];
+
       const auth = apiAuth[modelDef.endpoint];
       const apiKey = auth.apiKey;
       const apiEndpoint = auth.endpoint;
@@ -91,71 +95,80 @@ const useSubmit = () => {
       );
       if (messages.length === 0) throw new Error('Message exceeds max token!');
 
+      // javascript is an abomination
       delete (config as any).max_context;
       (config as any).model = modelDef.model;
 
+      // no api key (free)
       if (!apiKey || apiKey.length === 0) {
+        // official endpoint
         if (apiEndpoint === officialAPIEndpoint) {
           throw new Error(t('noApiKeyWarning') as string);
         }
-        stream = await getChatCompletionStream(apiEndpoint, messages, config, modelDef);
-      } else {
-        stream = await getChatCompletionStream(apiEndpoint, messages, config, modelDef, apiKey);
+
+        // other endpoints
+        stream = await getChatCompletionStream(
+          apiEndpoint,
+          messages,
+          config,
+          modelDef
+        );
+      } else if (apiKey) {
+        // own apikey
+        stream = await getChatCompletionStream(
+          apiEndpoint,
+          messages,
+          config,
+          modelDef,
+          apiKey
+        );
       }
 
       if (stream) {
         if (stream.locked) {
-          throw new Error('Oops, the stream is locked right now. Please try again');
+          throw new Error(
+            'Oops, the stream is locked right now. Please try again'
+          );
         }
         const reader = stream.getReader();
         let reading = true;
-        let leftover = '';
-
+        let partial = '';
         while (reading && useStore.getState().generating) {
           const { done, value } = await reader.read();
-          leftover += new TextDecoder().decode(value);
-          let events = parseEventSource(leftover);
-          let finishStream = false;
+          const result = parseEventSource(partial + new TextDecoder().decode(value));
+          partial = '';
 
-          const doneIndex = events.findIndex((event) => event === '[DONE]');
-          if (doneIndex !== -1) {
-            events = events.slice(0, doneIndex);
-            finishStream = true;
-          }
-
-          if (events.length > 0 && typeof events[events.length - 1] === 'string') {
-            leftover = events[events.length - 1] as string;
-            events = events.slice(0, events.length - 1);
-          } else {
-            leftover = '';
-          }
-
-          const resultString = events.reduce((output: string, curr) => {
-            if (typeof curr !== 'string') {
-              const content = curr.choices[0].delta.content;
-              if (content) {
-                output += content;
-              }
-            }
-            return output;
-          }, '');
-
-          if (resultString) {
-            const updatedChats: ChatInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
-            const updatedMessages = updatedChats[currentChatIndex].messages;
-            updatedMessages[updatedMessages.length - 1].content += resultString;
-            setChats(updatedChats);
-          }
-
-          if (done || finishStream) {
+          if (result === '[DONE]' || done) {
             reading = false;
+          } else {
+            const resultString = result.reduce((output: string, curr) => {
+              if (typeof curr === 'string') {
+                partial = curr;
+                return output;
+              } else {
+                const content = curr.choices[0].delta.content;
+                if (content) output += content;
+              }
+              return output;
+            }, '');
+
+            if (resultString) {
+              const updatedChats: ChatInterface[] = JSON.parse(
+                JSON.stringify(useStore.getState().chats)
+              );
+              const updatedMessages = updatedChats[currentChatIndex].messages;
+              updatedMessages[updatedMessages.length - 1].content += resultString;
+              setChats(updatedChats);
+            }
           }
         }
 
-        if (leftover) {
-          const updatedChats: ChatInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
+        if (partial) {
+          const updatedChats: ChatInterface[] = JSON.parse(
+            JSON.stringify(useStore.getState().chats)
+          );
           const updatedMessages = updatedChats[currentChatIndex].messages;
-          updatedMessages[updatedMessages.length - 1].content += leftover;
+          updatedMessages[updatedMessages.length - 1].content += partial;
           setChats(updatedChats);
         }
 
@@ -168,6 +181,7 @@ const useSubmit = () => {
         stream.cancel();
       }
 
+      // update tokens used in chatting
       const currChats = useStore.getState().chats;
       const countTotalTokens = useStore.getState().countTotalTokens;
 
@@ -181,6 +195,7 @@ const useSubmit = () => {
         );
       }
 
+      // generate title for new chats
       if (
         useStore.getState().autoTitle &&
         currChats &&
@@ -188,6 +203,7 @@ const useSubmit = () => {
       ) {
         const messages_length = currChats[currentChatIndex].messages.length;
 
+        // only first 800 chars of each message
         const assistant_message = currChats[currentChatIndex].messages[
           messages_length - 1
         ].content.slice(0, 800);
@@ -213,6 +229,7 @@ const useSubmit = () => {
         updatedChats[currentChatIndex].titleSet = true;
         setChats(updatedChats);
 
+        // update tokens used for generating title
         if (countTotalTokens) {
           updateTotalTokenUsed(0, [message], {
             role: 'assistant',
