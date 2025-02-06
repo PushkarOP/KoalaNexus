@@ -123,7 +123,7 @@ const useSubmit = () => {
               const { done, value } = await reader.read();
               if (done) break;
               partial += decoder.decode(value, { stream: true });
-              const results = parseEventSource(partial);
+              const results = parseEventSource(partial) as string | any[];
               partial = '';
               if (typeof results === 'string') {
                 if (results === '[DONE]') break;
