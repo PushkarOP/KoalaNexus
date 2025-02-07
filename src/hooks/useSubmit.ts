@@ -131,6 +131,8 @@ const useSubmit = () => {
         const reader = stream.getReader();
         let reading = true;
         let buffer = '';
+        // Create a single TextDecoder instance for streaming decoding.
+        const decoder = new TextDecoder('utf-8');
 
         while (reading && useStore.getState().generating) {
           const { done, value } = await reader.read();
@@ -140,8 +142,8 @@ const useSubmit = () => {
             break;
           }
 
-          // Append new chunk to buffer and process
-          buffer += new TextDecoder().decode(value);
+          // Decode the incoming chunk with streaming enabled.
+          buffer += decoder.decode(value, { stream: true });
           
           // Process complete events from buffer
           const result = parseEventSource(buffer);
@@ -176,6 +178,12 @@ const useSubmit = () => {
               setChats(updatedChats);
             }
           }
+        }
+
+        // Flush any remains from the decoder
+        const flush = decoder.decode();
+        if (flush) {
+          buffer += flush;
         }
 
         // Handle any remaining content in buffer
