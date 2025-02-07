@@ -150,21 +150,21 @@ const useSubmit = () => {
             reading = false;
           } else {
             let accumulatedContent = '';
-            let lastIncompleteChunk = '';
             
             for (const item of result) {
               if (typeof item === 'string') {
-                // Store incomplete chunk for next iteration
-                lastIncompleteChunk = item;
+                // Keep incomplete chunks in buffer
+                buffer = item;
+                console.debug('Incomplete chunk:', item);
               } else if (item.choices?.[0]?.delta?.content) {
-                accumulatedContent += item.choices[0].delta.content;
+                const chunk = item.choices[0].delta.content;
+                console.debug('Received chunk:', chunk);
+                accumulatedContent += chunk;
               }
             }
 
-            // Update buffer to only contain the incomplete chunk
-            buffer = lastIncompleteChunk;
-
             if (accumulatedContent) {
+              console.debug('Accumulated content:', accumulatedContent);
               const updatedChats: ChatInterface[] = JSON.parse(
                 JSON.stringify(useStore.getState().chats)
               );
