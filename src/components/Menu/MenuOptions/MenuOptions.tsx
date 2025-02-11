@@ -1,5 +1,6 @@
 import React from 'react';
 import SettingsMenu from '@components/SettingsMenu';
+import ApiIcon from '@icon/ApiIcon';
 
 const MenuOptions = () => {
   return (
@@ -11,7 +12,7 @@ const MenuOptions = () => {
           target='_blank'
           rel='noreferrer'
         >
-          Free API
+          <ApiIcon className='w-4 h-4' /> Free API
         </a>
         <SettingsMenu />
       </div>
