@@ -5,7 +5,7 @@ import useStore from '@store/store';
 // default system message obtained using the following method: https://twitter.com/DeminDimin/status/1619935545144279040
 export const _defaultSystemMessage =
   import.meta.env.VITE_DEFAULT_SYSTEM_MESSAGE ??
-  `You're helpful assistant that can help me with my questions.
+  `You are <model>, a large language model. Carefully heed the user's instructions. 
 Respond using Markdown.`;
 
 export const modelMaxToken = {
